@@ -1,6 +1,6 @@
 # [Respiratory Failure Calculator](https://respiratorycalc.vercel.app/)
 
-[![Respiratory Failure Calculator](https://raw.githubusercontent.com/iterating/respiratorycalc/refs/heads/main/public/portfolio.respiratorycalc.qr.png)](https://respiratorycalc.vercel.app/) <img src="https://raw.githubusercontent.com/iterating/respiratorycalc/refs/heads/main/public/portfolio.respiratorycalc.qr.png" width="100" height="100">
+[![Respiratory Failure Calculator](https://raw.githubusercontent.com/iterating/respiratorycalc/refs/heads/main/public/portfolio.respiratorycalc.qr.png){: width=100 height=100}](https://respiratorycalc.vercel.app/)
 **Try it out!**
 
 A modern web application for calculating respiratory failure based on arterial blood gas (ABG) analysis, designed to assist healthcare professionals in rapid diagnosis and classification of respiratory disorders.
