@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 
 // Import dependencies
 import SupabaseRespiratory from './src/infrastructure/database/SupabaseRespiratory.js';
+import InMemoryRespiratoryRepository from './src/infrastructure/database/memory/InMemoryRespiratoryRepository.js';
+import LocalStorageRespiratoryRepository from './src/infrastructure/database/localstorage/LocalStorageRespiratoryRepository.js';
 import RespiratoryService from './src/services/RespiratoryService.js';
 import RespiratoryController from './src/presentation/controllers/RespiratoryController.js';
 import createRespiratoryRouter from './src/presentation/routes/respiratoryRoutes.js';
@@ -31,10 +33,25 @@ let router;
 // Initialize application components
 async function initialize() {
     try {
-        // Initialize repository
-        repository = new SupabaseRespiratory();
+        // Initialize repository based on environment
+        const storageType = process.env.STORAGE_TYPE || 'localstorage';
+        let repository;
+        
+        switch (storageType) {
+            case 'supabase':
+                repository = new SupabaseRespiratory();
+                break;
+            case 'memory':
+                repository = new InMemoryRespiratoryRepository();
+                break;
+            case 'localstorage':
+            default:
+                repository = new LocalStorageRespiratoryRepository();
+                break;
+        }
+        
         await repository.initialize();
-        console.log('Repository initialized successfully');
+        console.log(`Repository (${storageType}) initialized successfully`);
 
         // Initialize service
         service = new RespiratoryService(repository);

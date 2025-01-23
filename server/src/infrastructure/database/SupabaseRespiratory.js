@@ -7,20 +7,57 @@ class SupabaseRespiratory {
     }
 
     async initialize() {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
         if (!supabaseUrl || !supabaseKey) {
-            throw new Error('Missing Supabase credentials');
+            console.error('Missing Supabase environment variables:', { 
+                hasUrl: !!supabaseUrl, 
+                hasKey: !!supabaseKey,
+            });
+            throw new Error('Missing Supabase environment variables. Please check your configuration.');
         }
 
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        console.log('Initializing Supabase with:', {
+            url: supabaseUrl,
+            hasKey: !!supabaseKey
+        });
+
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            auth: { persistSession: false }
+        });
         await this.createTableIfNotExists();
     }
 
     async createTableIfNotExists() {
-        const { error } = await this.supabase.rpc('create_respiratory_table');
-        if (error && !error.message.includes('already exists')) {
+        const { error } = await this.supabase.from('respiratory_calculations')
+            .select('id')
+            .limit(1);
+
+        // If we get an error about the relation not existing, create the table
+        if (error && error.message && error.message.includes('relation "respiratory_calculations" does not exist')) {
+            const { error: createError } = await this.supabase.sql`
+                CREATE TABLE IF NOT EXISTS respiratory_calculations (
+                    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+                    ph numeric,
+                    pa_co2 numeric,
+                    pa_o2 numeric,
+                    fi_o2 numeric,
+                    bicarbonate numeric,
+                    pf_ratio numeric,
+                    type text,
+                    has_respiratory_failure boolean,
+                    criteria jsonb,
+                    created_at timestamp with time zone DEFAULT timezone('utc'::text, now())
+                );
+            `;
+            
+            if (createError) {
+                console.error('Error creating table:', createError);
+                throw createError;
+            }
+        } else if (error) {
+            console.error('Error checking table:', error);
             throw error;
         }
     }
@@ -30,21 +67,19 @@ class SupabaseRespiratory {
             throw new Error('Database not initialized');
         }
 
-        const data = {
-            ph: calculation.ph,
-            pa_co2: calculation.paCO2,
-            pa_o2: calculation.paO2,
-            fi_o2: calculation.fio2,
-            bicarbonate: calculation.bicarbonate,
-            pf_ratio: calculation.pfRatio,
-            type: calculation.type,
-            has_respiratory_failure: calculation.hasRespiratoryFailure,
-            criteria: JSON.stringify(calculation.criteria)
-        };
-
-        const { data: savedData, error } = await this.supabase
+        const { data, error } = await this.supabase
             .from('respiratory_calculations')
-            .insert([data])
+            .insert([{
+                ph: calculation.ph,
+                pa_co2: calculation.paCO2,
+                pa_o2: calculation.paO2,
+                fi_o2: calculation.fio2,
+                bicarbonate: calculation.bicarbonate,
+                pf_ratio: calculation.pfRatio,
+                type: calculation.type,
+                has_respiratory_failure: calculation.hasRespiratoryFailure,
+                criteria: JSON.stringify(calculation.criteria)
+            }])
             .select()
             .single();
 
@@ -52,7 +87,7 @@ class SupabaseRespiratory {
             throw error;
         }
 
-        return this.mapToEntity(savedData);
+        return this.mapToEntity(data);
     }
 
     async getRecentCalculations(limit = 10) {
