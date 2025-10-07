@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Import dependencies
-import SupabaseRespiratory from './src/database/SupabaseRespiratory.js';
+import NeonRespiratory from './src/database/NeonRespiratory.js';
 import InMemoryRespiratoryRepository from './src/database/memory/InMemoryRespiratoryRepository.js';
 import LocalStorageRespiratoryRepository from './src/database/localstorage/LocalStorageRespiratoryRepository.js';
 import RespiratoryService from './src/services/RespiratoryService.js';
@@ -38,8 +38,8 @@ async function initialize() {
         let repository;
         
         switch (storageType) {
-            case 'supabase':
-                repository = new SupabaseRespiratory();
+            case 'neon':
+                repository = new NeonRespiratory();
                 break;
             case 'memory':
                 repository = new InMemoryRespiratoryRepository();

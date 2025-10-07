@@ -39,7 +39,7 @@ Accurate interpretation of blood gases is crucial because:
 - **Calculation History**: Track and review previous analyses
 - **User-friendly Interface**: Clean, intuitive design for rapid data entry
 - **Mobile Responsive**: Use on any device at the bedside
-- **Data Persistence**: Secure storage of calculations using Supabase
+- **Data Persistence**: Secure storage of calculations using Neon
 - **Health Data Interoperability**: Export results in FHIR format
   - FHIR: Export as FHIR R4 Observation resources (JSON)
 
@@ -49,7 +49,7 @@ Accurate interpretation of blood gases is crucial because:
 
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3
 - **Backend**: Node.js with Express
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Neon (Serverless PostgreSQL)
 - **Architecture**: Clean Architecture with Domain-Driven Design
 - **Deployment**: Vercel for serverless deployment
 - **Healthcare Standards**: FHIR R4, HL7 v2.5.1
